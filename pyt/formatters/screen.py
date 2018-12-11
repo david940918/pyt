@@ -30,9 +30,9 @@ def report(
     unsanitised_vulnerabilities = [v for v in vulnerabilities if not isinstance(v, SanitisedVulnerability)]
     n_unsanitised = len(unsanitised_vulnerabilities)
     n_sanitised = n_vulnerabilities - n_unsanitised
-    heading = "{} vulnerabilit{} found{}.\n".format(
-        'No' if n_unsanitised == 0 else n_unsanitised,
-        'y' if n_unsanitised == 1 else 'ies',
+    heading = "{}개의 취약{}을 발견{}.\n".format(
+        '0' if n_unsanitised == 0 else n_unsanitised,
+        '점' if n_unsanitised == 1 else '점들',
         " (plus {} sanitised)".format(n_sanitised) if n_sanitised else "",
     )
     vulnerabilities_to_print = vulnerabilities if print_sanitised else unsanitised_vulnerabilities
@@ -48,10 +48,10 @@ def report(
 
 def vulnerability_to_str(i, vulnerability):
     lines = []
-    lines.append(color('Vulnerability {}'.format(i), UNDERLINE))
-    lines.append('File: {}'.format(color(vulnerability.source.path, BOLD)))
+    lines.append(color('취약점 {}'.format(i), UNDERLINE))
+    lines.append('파일: {}'.format(color(vulnerability.source.path, BOLD)))
     lines.append(
-        'User input at line {}, source "{}":'.format(
+        '사용자가 {}번 째 라인에, "{}"를 입력하였다:'.format(
             vulnerability.source.line_number,
             color(vulnerability.source_trigger_word, HIGHLIGHT),
         )
@@ -59,10 +59,10 @@ def vulnerability_to_str(i, vulnerability):
     lines.append('\t{}'.format(color(vulnerability.source.label, RED_ON_WHITE)))
     if vulnerability.reassignment_nodes:
         previous_path = None
-        lines.append('Reassigned in:')
+        lines.append('재할당:')
         for node in vulnerability.reassignment_nodes:
             if node.path != previous_path:
-                lines.append('\tFile: {}'.format(node.path))
+                lines.append('\t파일: {}'.format(node.path))
                 previous_path = node.path
             label = node.label
             if (
@@ -71,13 +71,13 @@ def vulnerability_to_str(i, vulnerability):
             ):
                 label = color(label, GOOD)
             lines.append(
-                '\t  Line {}:\t{}'.format(
+                '\t  {}번 째 줄:\t{}'.format(
                     node.line_number,
                     label,
                 )
             )
     if vulnerability.source.path != vulnerability.sink.path:
-        lines.append('File: {}'.format(color(vulnerability.sink.path, BOLD)))
+        lines.append('파일: {}'.format(color(vulnerability.sink.path, BOLD)))
     lines.append(
         'Reaches line {}, sink "{}"'.format(
             vulnerability.sink.line_number,
@@ -89,15 +89,15 @@ def vulnerability_to_str(i, vulnerability):
     ))
     if isinstance(vulnerability, SanitisedVulnerability):
         lines.append(
-            'This vulnerability is {}{} by {}'.format(
-                color('potentially ', BOLD) if not vulnerability.confident else '',
-                color('sanitised', GOOD),
+            '이 취약점은 {}{}. {} 이용'.format(
+                color('잠재적으로 ', BOLD) if not vulnerability.confident else '',
+                color('정화되었다', GOOD),
                 color(vulnerability.sanitiser.label, BOLD),
             )
         )
     elif isinstance(vulnerability, UnknownVulnerability):
         lines.append(
-            'This vulnerability is unknown due to "{}"'.format(
+            '이 취약점은 "{}" 때문에 알려지지 않았다.'.format(
                 color(vulnerability.unknown_assignment.label, BOLD),
             )
         )

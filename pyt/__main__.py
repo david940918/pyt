@@ -1,4 +1,4 @@
-"""The comand line module of PyT."""
+"""The command line module of PyT."""
 
 import logging
 import os
@@ -34,27 +34,32 @@ def discover_files(targets, excluded_files, recursive=False):
     included_files = list()
     excluded_list = excluded_files.split(",")
     for target in targets:
-        if os.path.isdir(target):
-            for root, _, files in os.walk(target):
-                for file in files:
-                    if file.endswith('.py') and file not in excluded_list:
-                        fullpath = os.path.join(root, file)
-                        included_files.append(fullpath)
-                        log.debug('Discovered file: %s', fullpath)
-                if not recursive:
-                    break
+        if os.path.exists(target):  # 타겟 경로가 존재한다면.
+            if os.path.isdir(target):
+                for rootpath, dir, files in os.walk(target): # 인자명을 변경하여 가독성을 높였다.
+                    for file in files:
+                        if file.endswith('.py') and file not in excluded_list:
+                            fullpath = os.path.join(rootpath, file)
+                            included_files.append(fullpath)
+                            log.debug('Discovered file: %s', fullpath)
+                    if not recursive:
+                        break
+            else:
+                if target not in excluded_list:
+                    included_files.append(target)
+                    log.debug('Discovered file: %s', target)
         else:
-            if target not in excluded_list:
-                included_files.append(target)
-                log.debug('Discovered file: %s', target)
+            continue
     return included_files
 
 
 def retrieve_nosec_lines(
     path
 ):
-    file = open(path, 'r')
-    lines = file.readlines()
+    # file 입출력을 위해 file을 open하는데 close를 해주고 있지 않다.
+    # with문을 사용하면 file의 open과 close를 동시에 처리해 줄 수 있다.
+    with open(path, 'r') as file:
+        lines = file.readlines()
     return set(
         lineno for
         (lineno, line) in enumerate(lines, start=1)
